@@ -3,7 +3,7 @@ import { updateOrder, createKeyStatusChangeNotification, getOrders } from '@/lib
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: any
 ) {
   try {
     const { keyStatus } = await request.json();

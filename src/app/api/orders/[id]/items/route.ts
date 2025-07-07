@@ -4,7 +4,7 @@ import { getOrderItems, getConstructionItems } from '@/lib/googleSheets';
 // 特定注文の施工項目取得
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: any
 ) {
   try {
     const orderId = params.id;
