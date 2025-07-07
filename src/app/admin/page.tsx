@@ -441,6 +441,22 @@ export default function AdminDashboard() {
                   )}
                 </div>
 
+                {/* 本日ボタン */}
+                <button
+                  onClick={() => {
+                    const d = new Date();
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    const today = `${yyyy}-${mm}-${dd}`;
+                    setDateFilterFrom(today);
+                    setDateFilterTo(today);
+                  }}
+                  className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors"
+                >
+                  本日
+                </button>
+
                 {/* 会社名フィルター */}
                 <div className="relative flex-1">
                   <select

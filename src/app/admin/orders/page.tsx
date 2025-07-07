@@ -451,7 +451,7 @@ export default function OrderManagementPage() {
           </div>
         )}
         {/* フィルターバー */}
-        <div className="hidden md:block bg-white border-b border-gray-100 px-4 py-4 flex-shrink-0">
+        <div className="bg-white border-b border-gray-100 px-4 py-4 flex-shrink-0">
           <div className="flex items-center gap-4 flex-wrap">
             {/* 施工日期間フィルター */}
             <div className="flex items-center gap-2 relative">
@@ -484,6 +484,22 @@ export default function OrderManagementPage() {
                 </button>
               )}
             </div>
+
+            {/* 本日ボタン */}
+            <button
+              onClick={() => {
+                const d = new Date();
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                const today = `${yyyy}-${mm}-${dd}`;
+                setDateFilterFrom(today);
+                setDateFilterTo(today);
+              }}
+              className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors"
+            >
+              本日
+            </button>
 
             {/* ステータスフィルター */}
             <div className="relative">

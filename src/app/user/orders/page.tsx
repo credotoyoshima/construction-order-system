@@ -479,6 +479,22 @@ export default function UserOrdersPage() {
               )}
             </div>
 
+            {/* 本日ボタン */}
+            <button
+              onClick={() => {
+                const d = new Date();
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                const today = `${yyyy}-${mm}-${dd}`;
+                setDateFilterFrom(today);
+                setDateFilterTo(today);
+              }}
+              className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors"
+            >
+              本日
+            </button>
+
             {/* ステータスフィルター */}
             <div className="relative">
             <select
@@ -643,7 +659,7 @@ export default function UserOrdersPage() {
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                           </svg>
                         ) : (
-                          <Key className={`h-4 w-4 ${getKeyStatusStyle(order.keyStatus)}`} />
+                        <Key className={`h-4 w-4 ${getKeyStatusStyle(order.keyStatus)}`} />
                         )}
                       </button>
                     </td>
