@@ -9,7 +9,7 @@ import type { Notification } from '@/types';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { orderId: string } }
+  { params }
 ) {
   try {
     const { orderId } = params;
@@ -53,7 +53,7 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { orderId: string } }
+  { params }
 ) {
   try {
     const { orderId } = params;
@@ -156,8 +156,7 @@ export async function POST(
  * チャットメッセージの既読処理
  */
 export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { orderId: string } }
+  request: NextRequest
 ) {
   try {
     const { messageId } = await request.json();
