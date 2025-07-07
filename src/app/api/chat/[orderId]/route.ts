@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getChatMessages, sendChatMessage, markChatMessageAsRead, getOrders, getUsers, getAdminUsers } from '@/lib/googleSheets';
 import { sendNotificationEmailToAdmins } from '@/lib/email';
 import type { Notification } from '@/types';
@@ -8,8 +8,8 @@ import type { Notification } from '@/types';
  * チャットメッセージの取得
  */
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { orderId: string } }
+  request: Request,
+  { params }: any
 ) {
   try {
     const { orderId } = params;
@@ -52,8 +52,8 @@ export async function GET(
  * チャットメッセージの送信
  */
 export async function POST(
-  request: NextRequest,
-  { params }: { params: { orderId: string } }
+  request: Request,
+  { params }: any
 ) {
   try {
     const { orderId } = params;
@@ -156,7 +156,7 @@ export async function POST(
  * チャットメッセージの既読処理
  */
 export async function PATCH(
-  request: NextRequest
+  request: Request
 ) {
   try {
     const { messageId } = await request.json();
