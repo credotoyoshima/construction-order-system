@@ -27,6 +27,25 @@ export default function AdminUsersPage() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [showRoleModal, setShowRoleModal] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserType | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editFormData, setEditFormData] = useState<{
+    companyName: string;
+    storeName: string;
+    email: string;
+    phoneNumber: string;
+    address: string;
+    status: 'active' | 'inactive';
+  }>({
+    companyName: '',
+    storeName: '',
+    email: '',
+    phoneNumber: '',
+    address: '',
+    status: 'active',
+  });
+  const [saving, setSaving] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   // データ取得
   const fetchData = async () => {
@@ -162,9 +181,27 @@ export default function AdminUsersPage() {
   };
 
   // ユーザー削除
-  const handleDeleteUser = (userId: string) => {
-    if (confirm('このユーザーを削除しますか？この操作は取り消せません。')) {
-      alert(`ユーザーID: ${userId} の削除機能は実装中です。`);
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('このユーザーを削除しますか？この操作は取り消せません。')) return;
+    try {
+      setDeleting(userId);
+      const response = await fetch('/api/users/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setUsers((prev) => prev.filter((u) => u.id !== userId));
+        alert(result.message || 'ユーザーを削除しました');
+      } else {
+        alert('削除に失敗しました: ' + result.error);
+      }
+    } catch (error) {
+      console.error('ユーザー削除エラー:', error);
+      alert('削除中にエラーが発生しました');
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -180,6 +217,49 @@ export default function AdminUsersPage() {
   // 権限の日本語表示
   const getRoleDisplayName = (role: string) => {
     return role === 'admin' ? '管理者' : '一般ユーザー';
+  };
+
+  // 編集モーダルを開く
+  const openEditModal = (user: UserType) => {
+    setEditingUser(user);
+    setEditFormData({
+      companyName: user.companyName,
+      storeName: user.storeName,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      address: user.address,
+      status: user.status,
+    });
+    setShowEditModal(true);
+  };
+
+  // 編集を保存
+  const saveUserEdits = async () => {
+    if (!editingUser) return;
+    try {
+      setSaving(editingUser.id);
+      const response = await fetch('/api/users/update', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: editingUser.id, ...editFormData }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setUsers((prev) =>
+          prev.map((u) => (u.id === editingUser.id ? { ...u, ...result.data } : u))
+        );
+        alert(result.message || 'ユーザー情報を更新しました');
+        setShowEditModal(false);
+        setEditingUser(null);
+      } else {
+        alert('更新に失敗しました: ' + result.error);
+      }
+    } catch (error) {
+      console.error('ユーザー更新エラー:', error);
+      alert('更新中にエラーが発生しました');
+    } finally {
+      setSaving(null);
+    }
   };
 
   // 認証チェック中のローディング
@@ -297,26 +377,40 @@ export default function AdminUsersPage() {
                     </button>
                   </td>
                   <td className="py-4 text-sm text-gray-800 font-medium">{formatDate(user.createdAt)}</td>
-                                     <td className="py-4 text-center">
-                     <button
-                       onClick={() => alert('編集機能は実装中です。')}
-                       className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200"
-                       title="編集"
-                     >
-                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                       </svg>
-                     </button>
-                   </td>
+                  <td className="py-4 text-center">
+                    <button
+                      onClick={() => openEditModal(user)}
+                      disabled={saving === user.id}
+                      className={`p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200 ${saving === user.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      title="編集"
+                    >
+                      {saving === user.id ? (
+                        <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      )}
+                    </button>
+                  </td>
                   <td className="py-4 text-center">
                     <button
                       onClick={() => handleDeleteUser(user.id)}
-                      className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
+                      disabled={deleting === user.id}
+                      className={`p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200 ${deleting === user.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                       title="削除"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
+                      {deleting === user.id ? (
+                        <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      )}
                     </button>
                   </td>
                 </tr>
@@ -398,6 +492,87 @@ export default function AdminUsersPage() {
         </div>
       )}
 
+      {/* ユーザー編集モーダル */}
+      {showEditModal && editingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">ユーザー情報編集</h3>
+            <div className="space-y-4">
+              {/* 会社名 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">会社名</label>
+                <input
+                  type="text"
+                  value={editFormData.companyName}
+                  onChange={(e) => setEditFormData((prev) => ({ ...prev, companyName: e.target.value }))}
+                  className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                />
+              </div>
+              {/* 店舗名 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">店舗名</label>
+                <input
+                  type="text"
+                  value={editFormData.storeName}
+                  onChange={(e) => setEditFormData((prev) => ({ ...prev, storeName: e.target.value }))}
+                  className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                />
+              </div>
+              {/* メールアドレス */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">メールアドレス</label>
+                <input
+                  type="email"
+                  value={editFormData.email}
+                  onChange={(e) => setEditFormData((prev) => ({ ...prev, email: e.target.value }))}
+                  className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                />
+              </div>
+              {/* 電話番号 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">電話番号</label>
+                <input
+                  type="text"
+                  value={editFormData.phoneNumber}
+                  onChange={(e) => setEditFormData((prev) => ({ ...prev, phoneNumber: e.target.value }))}
+                  className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                />
+              </div>
+              {/* 住所 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">住所</label>
+                <input
+                  type="text"
+                  value={editFormData.address}
+                  onChange={(e) => setEditFormData((prev) => ({ ...prev, address: e.target.value }))}
+                  className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                />
+              </div>
+              {/* ステータス */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">ステータス</label>
+                <select
+                  value={editFormData.status}
+                  onChange={(e) => setEditFormData((prev) => ({ ...prev, status: e.target.value as 'active' | 'inactive' }))}
+                  className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                >
+                  <option value="active">アクティブ</option>
+                  <option value="inactive">インアクティブ</option>
+                </select>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                onClick={saveUserEdits}
+                disabled={saving === editingUser.id}
+                className={`px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-xl hover:bg-gray-300 transition-colors ${saving === editingUser.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {saving === editingUser.id ? '保存中...' : '保存'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </AdminLayout>
   );

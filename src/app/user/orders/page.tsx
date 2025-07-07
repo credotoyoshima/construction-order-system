@@ -635,9 +635,16 @@ export default function UserOrdersPage() {
                         onClick={() => updateKeyStatus(order.id, order.keyStatus)}
                         disabled={updating === order.id}
                         className="flex items-center hover:opacity-70 transition-opacity disabled:opacity-50"
-                        title={order.keyStatus === 'pending' ? '鍵到着済' : '鍵未着'}
+                        title={updating === order.id ? '更新中...' : order.keyStatus === 'pending' ? '鍵到着済' : '鍵未着'}
                       >
-                        <Key className={`h-4 w-4 ${getKeyStatusStyle(order.keyStatus)}`} />
+                        {updating === order.id ? (
+                          <svg className="animate-spin h-4 w-4 text-blue-500" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                          </svg>
+                        ) : (
+                          <Key className={`h-4 w-4 ${getKeyStatusStyle(order.keyStatus)}`} />
+                        )}
                       </button>
                     </td>
                     <td className="py-4 px-4">
