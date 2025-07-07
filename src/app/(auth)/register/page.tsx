@@ -229,7 +229,7 @@ export default function RegisterPage() {
                   ? 'border-red-300 focus:border-red-400 focus:ring-red-200' 
                   : 'border-gray-200 focus:border-blue-400 focus:ring-blue-200'
               } focus:ring focus:ring-opacity-50 outline-none transition-all bg-white/70 text-gray-700 placeholder-gray-400 shadow-sm`}
-              placeholder="神戸市中央区区○○○ 1-2-3"
+              placeholder="神戸市中央区○○○ 1-2-3"
               disabled={isSubmitting}
             />
             {errors.address && (
