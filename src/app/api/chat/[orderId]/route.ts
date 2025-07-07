@@ -9,7 +9,7 @@ import type { Notification } from '@/types';
  */
 export async function GET(
   request: NextRequest,
-  { params }
+  { params }: { params: { orderId: string } }
 ) {
   try {
     const { orderId } = params;
@@ -53,7 +53,7 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }
+  { params }: { params: { orderId: string } }
 ) {
   try {
     const { orderId } = params;
