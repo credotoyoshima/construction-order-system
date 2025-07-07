@@ -5,7 +5,7 @@ import type { Order } from '@/types';
 // 特定注文の取得
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: any
 ) {
   try {
     const orderId = params.id;
@@ -36,7 +36,7 @@ export async function GET(
 // 注文の更新
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: any
 ) {
   try {
     const orderId = params.id;
