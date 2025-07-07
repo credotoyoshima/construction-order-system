@@ -25,19 +25,20 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    const { 
-      userId, 
-      propertyName, 
-      roomNumber, 
-      address, 
-      constructionDate, 
-      keyLocation, 
-      keyReturn, 
-      notes 
+    const {
+      userId,
+      contactPerson,
+      propertyName,
+      roomNumber,
+      address,
+      constructionDate,
+      keyLocation,
+      keyReturn,
+      notes
     } = body;
 
     // バリデーション
-    if (!userId || !propertyName || !address || !constructionDate) {
+    if (!userId || !contactPerson || !propertyName || !address || !constructionDate) {
       return NextResponse.json({
         success: false,
         error: '必須項目が不足しています'
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
 
     const newOrder = await addOrder({
       userId,
+      contactPerson,
       propertyName,
       roomNumber: roomNumber || '',
       address,
