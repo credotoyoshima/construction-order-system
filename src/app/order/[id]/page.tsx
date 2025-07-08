@@ -615,7 +615,10 @@ export default function OrderDetailPage() {
 
   const canCancel = () => {
     if (!currentUser || !order) return false;
-    return currentUser.role === 'user' && order.status !== '依頼キャンセル';
+    // ユーザーのみ操作可能
+    if (currentUser.role !== 'user') return false;
+    // キャンセル可能なステータスは「日程待ち」「日程確定」のみ
+    return ['日程待ち', '日程確定'].includes(order.status);
   };
 
   const canClickCancel = () => {
@@ -779,24 +782,26 @@ export default function OrderDetailPage() {
                 );
               })}
               
-              {/* 依頼キャンセル */}
-              {canCancel() && (
-                <div className="flex flex-col items-center relative">
-                  <button
-                    onClick={canClickCancel() ? handleCancelOrder : undefined}
-                    disabled={saving || !canClickCancel()}
-                    className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 bg-rose-50 border-2 border-red-500 text-red-500 hover:bg-rose-100 disabled:opacity-50 ${
-                      canClickCancel() ? 'cursor-pointer hover:scale-110' : 'cursor-not-allowed'
-                    }`}
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                  
-                  <span className="mt-2 text-xs font-medium text-red-500">
-                    {cancelStep.label}
-                  </span>
-                </div>
-              )}
+              {/* 依頼キャンセルボタン（常に表示、クリック不可時はグレーアウト） */}
+              <div className="flex flex-col items-center relative">
+                <button
+                  onClick={canClickCancel() ? handleCancelOrder : undefined}
+                  disabled={saving || !canClickCancel()}
+                  className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 ${
+                    canClickCancel()
+                      ? 'bg-rose-50 border-2 border-red-500 text-red-500 hover:bg-rose-100 cursor-pointer hover:scale-110'
+                      : 'bg-gray-100 border-2 border-gray-300 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                <span className={`mt-2 text-xs font-medium ${
+                  canClickCancel() ? 'text-red-500' : 'text-gray-400'
+                }`}>
+                  {cancelStep.label}
+                </span>
+              </div>
             </div>
           </div>
         )}
